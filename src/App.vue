@@ -1,7 +1,10 @@
 <template>
 <div class="container">
   <Header title="Hello"></Header>
-  <Tasks :tasks="tasks"></Tasks>
+  <Tasks 
+  @toggle-reminder="toggleReminder"
+  @delete-task="deleteTask" 
+  :tasks="tasks"></Tasks>
 </div>
 </template>
 
@@ -18,6 +21,18 @@ export default {
   data() {
     return {
       tasks: []
+    }
+  },
+  methods: {
+    deleteTask(id) {
+      if(confirm("Are you sure you wish to delete this task?")) {
+        this.tasks = this.tasks.filter((task) => task.id !== id);
+      }
+    },
+    toggleReminder(id) {
+      console.log(id);
+      this.tasks = this.tasks.map((task) => task.id === id ? {...task, reminder: !task.reminder} : task
+      )
     }
   },
   created() {
