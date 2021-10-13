@@ -59,7 +59,8 @@ export default {
                 day: this.day,
                 reminder: this.reminder
             }
-            console.log(newTask)
+            //send new task upwards to app.vue
+            this.$emit("add-task", newTask);
             //reset fields
             this.text = "";
             this.day = "";
