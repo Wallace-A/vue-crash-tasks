@@ -35,38 +35,60 @@ export default {
     }
   },
   methods: {
-    addTask(task) {
-      this.tasks = [...this.tasks, task]
+    async addTask(task) {
+      const response= await fetch("api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(task),
+      })
+      const data = await response.json();
+
+      this.tasks = [...this.tasks, data]
     },
-    deleteTask(id) {
+    async deleteTask(id) {
       if(confirm("Are you sure you wish to delete this task?")) {
-        this.tasks = this.tasks.filter((task) => task.id !== id);
+        const response = await fetch(`api/tasks/${id}`, {
+          method: "DELETE"
+        })
+        response.status === 200 ? (this.tasks = this.tasks.filter((task) => task.id !== id)) : alert('Error deleting task');
       }
     },
-    toggleReminder(id) {
-      console.log(id);
-      this.tasks = this.tasks.map((task) => task.id === id ? {...task, reminder: !task.reminder} : task
+    async toggleReminder(id) {
+      const taskToToggle = await this.fetchTask(id);
+      const updatedTask = {...taskToToggle, reminder: !taskToToggle.reminder};
+      
+      const response = await fetch (`api/tasks/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(updatedTask)
+      })
+      const data = await response.json();
+
+      this.tasks = this.tasks.map((task) => task.id === id ? {...task, reminder: data.reminder} : task
       )
     },
     toggleAddTask() {
       this.showAddTask = !this.showAddTask;
+    },
+    async fetchTasks() {
+      const response = await fetch("api/tasks");
+      const data = await response.json();
+      return data;
+
+    },
+    async fetchTask(id) {
+      const response = await fetch(`api/tasks/${id}`);
+      const data = await response.json();
+      return data;
+
     }
   },
-  created() {
-    this.tasks = [
-      {
-        id: 1,
-        text: "Doctors Appointment",
-        day: "March 1st  at 2:30pm",
-        reminder: true
-      },
-      {
-        id: 2,
-        text: "Phone Mum",
-        day: "March 22st  at 41:30pm",
-        reminder: false
-      }
-    ]
+  async created() {
+    this.tasks = await this.fetchTasks();
   }
 }
 </script>
